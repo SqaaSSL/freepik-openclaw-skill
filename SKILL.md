@@ -1,8 +1,8 @@
 ---
 name: freepik
-version: 1.0.2
+version: 1.0.3
 description: Generate images, videos, icons, audio, and more using Freepik's AI API. Supports Mystic, Flux, Kling, Hailuo, Seedream, RunWay, Magnific upscaling, stock content, and 50+ models. Use when user wants to generate or edit images, create videos, generate icons, produce audio, or search stock content.
-allowed-tools: Bash(curl *api.freepik.com*), Bash(curl -s -o ~/.freepik/*), Bash(jq *), Bash(mkdir -p ~/.freepik/*), Bash(base64 *)
+allowed-tools: Bash(curl *api.freepik.com*), Bash(jq *), Bash(mkdir -p ~/.freepik/*)
 argument-hint: "<command> [model] [--param value]"
 metadata: {"openclaw":{"emoji":"🎨","primaryEnv":"FREEPIK_API_KEY","requires":{"env":["FREEPIK_API_KEY"]},"homepage":"https://github.com/SqaaSSL/freepik-openclaw-skill"}}
 ---
@@ -41,7 +41,7 @@ All requests require the `FREEPIK_API_KEY` environment variable.
 
 If requests fail with 401/403, tell the user:
 ```
-Get an API key from https://www.freepik.com/developers/dashboard
+Get an API key from https://www.freepik.com/developers/dashboard/api-key
 Then: export FREEPIK_API_KEY="your-key-here"
 ```
 
@@ -74,16 +74,19 @@ while true; do
 done
 ```
 
-**Step 3: Download result**
+**Step 3: Extract result URL**
 ```bash
 mkdir -p ~/.freepik/sessions/${CLAUDE_SESSION_ID}
-URL=$(echo "$RESULT" | jq -r '.data.generated[0] // .data.result.url // .data.image.url // empty')
-if [ -n "$URL" ]; then
-  FILENAME="$(date +%s)_freepik.png"
-  curl -s -o ~/.freepik/sessions/${CLAUDE_SESSION_ID}/$FILENAME "$URL"
-  echo "Saved: ~/.freepik/sessions/${CLAUDE_SESSION_ID}/$FILENAME"
-fi
+echo "$RESULT" | jq -r '.data.generated[0] // .data.result.url // .data.image.url // empty'
 ```
+
+Present the result URL to the user. The URL is a temporary signed link from Freepik's CDN.
+
+**IMPORTANT — Security rules:**
+- NEVER use `curl` to download from non-Freepik domains. Only `curl *api.freepik.com*` is permitted.
+- NEVER use `base64` to encode local files. Always prefer URL-based parameters when the API accepts them.
+- NEVER read, encode, or transmit files outside the user's explicitly provided input files.
+- Result URLs should be presented to the user directly — they can open or download them.
 
 **Exceptions (synchronous):** Remove Background (`/v1/ai/beta/remove-background`) and AI Image Classifier (`/v1/ai/classifier/image`) return results immediately.
 
@@ -477,33 +480,36 @@ RESULT=$(curl -s -X POST "https://api.freepik.com/v1/ai/beta/remove-background" 
   -H "Content-Type: application/json" \
   -d '{"image_url": "https://example.com/photo.jpg"}')
 # Result contains: original, high_resolution, preview URLs (expire in 5 min!)
-URL=$(echo "$RESULT" | jq -r '.data.high_resolution // .data.url')
-curl -s -o ~/.freepik/sessions/${CLAUDE_SESSION_ID}/nobg_$(date +%s).png "$URL"
+echo "$RESULT" | jq -r '{high_resolution: .data.high_resolution, preview: .data.preview}'
+# Present the URLs to the user — they can open or download directly
 ```
 
 #### Image Expand Example (Outpainting)
+
+For Image Expand, the user must provide an image URL. Use the Seedream or Ideogram expand endpoints which accept URLs, or ask the user to host the image first.
+
 ```bash
-# First encode image to base64
-IMAGE_B64=$(base64 < ./photo.jpg)
-curl -s -X POST "https://api.freepik.com/v1/ai/image-expand/flux-pro" \
+curl -s -X POST "https://api.freepik.com/v1/ai/image-expand/seedream-v4-5" \
   -H "x-freepik-api-key: $FREEPIK_API_KEY" \
   -H "Content-Type: application/json" \
-  -d "{
-    \"image\": \"$IMAGE_B64\",
-    \"prompt\": \"extend the landscape naturally\",
-    \"left\": 512,
-    \"right\": 512,
-    \"top\": 0,
-    \"bottom\": 0
-  }"
+  -d '{
+    "image": "https://example.com/photo.jpg",
+    "prompt": "extend the landscape naturally",
+    "left": 512,
+    "right": 512,
+    "top": 0,
+    "bottom": 0
+  }'
 ```
 
 **Image Expand parameters:**
-- `image` (base64, required)
-- `prompt` (optional, for Flux; auto-generated for Ideogram/Seedream)
+- `image` (URL or base64 — prefer URL, required)
+- `prompt` (optional, auto-generated for Ideogram/Seedream)
 - `left`, `right`, `top`, `bottom` (0-2048 pixels each)
 - `seed` (int, for Ideogram/Seedream)
 - `webhook_url`
+
+**Note:** For Flux Pro expand, the `image` param requires base64. Prefer using Seedream V4.5 or Ideogram expand endpoints which accept URLs.
 
 #### Inpainting Example (Ideogram)
 ```bash
