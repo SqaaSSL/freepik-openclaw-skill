@@ -10,8 +10,16 @@ Built and maintained by the [ShellBot](https://getshell.ai) team for use with Op
 
 ## Installation
 
+### From ClawHub (recommended)
+
 ```bash
-git clone https://github.com/SqaaSSL/freepik-openclaw-skill ~/.claude/skills/freepik
+clawhub install freepik
+```
+
+### Manual
+
+```bash
+git clone https://github.com/SqaaSSL/freepik-openclaw-skill ~/.openclaw/skills/freepik
 ```
 
 ## Setup
