@@ -1,6 +1,6 @@
 ---
 name: freepik
-version: 1.0.0
+version: 1.0.1
 description: Generate images, videos, icons, audio, and more using Freepik's AI API. Supports Mystic, Flux, Kling, Hailuo, Seedream, RunWay, Magnific upscaling, stock content, and 50+ models. Use when user wants to generate or edit images, create videos, generate icons, produce audio, or search stock content.
 allowed-tools: Bash(curl *), Bash(jq *), Bash(mkdir *), Bash(base64 *), Read, Write
 argument-hint: "<command> [model] [--param value]"
