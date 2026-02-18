@@ -1,13 +1,17 @@
 # freepik-skill
 
-A [Claude Code](https://claude.ai/code) skill for the [Freepik API](https://www.freepik.com/api) — image generation, video generation, image editing, icon generation, audio, stock content, and AI utilities.
+![ShellBot Cover](shellbot-cover.png)
 
-Built and maintained by the [ShellBot](https://getshell.ai) team for use with [OpenClaw](https://openclaw.ai) hosted instances.
+An [OpenClaw](https://openclaw.ai) skill for the [Freepik API](https://www.freepik.com/api) — image generation, video generation, image editing, icon generation, audio, stock content, and AI utilities.
+
+Built and maintained by the [ShellBot](https://getshell.ai) team for use with OpenClaw hosted instances.
+
+> **Free credits:** Register at [freepik.com](https://www.freepik.com/) and get **$5 USD in free API credits** to start generating right away — no credit card required.
 
 ## Installation
 
 ```bash
-git clone https://github.com/shellbot-ai/freepik-skill ~/.claude/skills/freepik
+git clone https://github.com/SqaaSSL/freepik-openclaw-skill ~/.claude/skills/freepik
 ```
 
 ## Setup
@@ -23,6 +27,44 @@ git clone https://github.com/shellbot-ai/freepik-skill ~/.claude/skills/freepik
    ```bash
    source ~/.zshrc
    ```
+
+## Architecture
+
+### How the Skill Works
+
+```mermaid
+flowchart LR
+    User([User]) -->|natural language\nor /freepik command| Agent[OpenClaw Agent]
+    Agent -->|reads| Skill[SKILL.md]
+    Skill -->|instructs| Agent
+    Agent -->|curl POST| API[Freepik API]
+    API -->|task_id| Agent
+    Agent -->|poll GET| API
+    API -->|result URL| Agent
+    Agent -->|curl download| Files[Local Files]
+    Files -->|~/.freepik/sessions/| User
+```
+
+### Async Task Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant A as OpenClaw Agent
+    participant F as Freepik API
+
+    A->>F: POST /v1/ai/{endpoint} (prompt, params)
+    F-->>A: { task_id: "abc-123" }
+
+    loop Poll every 3s
+        A->>F: GET /v1/ai/{endpoint}/abc-123
+        F-->>A: { status: "IN_PROGRESS" }
+    end
+
+    A->>F: GET /v1/ai/{endpoint}/abc-123
+    F-->>A: { status: "COMPLETED", result: { url: "..." } }
+
+    A->>A: Download & save to session folder
+```
 
 ## Usage
 
@@ -61,7 +103,7 @@ git clone https://github.com/shellbot-ai/freepik-skill ~/.claude/skills/freepik
 /freepik stock images --query "business meeting"
 ```
 
-Or just ask Claude naturally:
+Or just ask naturally:
 
 > "Generate a 4K image of a mountain landscape using Freepik"
 
@@ -87,7 +129,7 @@ See [models-reference.md](models-reference.md) for the complete model catalog wi
 
 ## How It Works
 
-This skill teaches Claude how to interact with Freepik's REST API using curl. Most endpoints are async (queue-based):
+This skill teaches an OpenClaw agent how to interact with Freepik's REST API using curl. Most endpoints are async (queue-based):
 
 1. POST request submits a task and returns a `task_id`
 2. Poll the GET endpoint until `status: "COMPLETED"`
@@ -100,8 +142,8 @@ Some endpoints (Remove Background, AI Classifier) are synchronous.
 - [Freepik API Docs](https://docs.freepik.com) - Full API documentation
 - [Freepik Developers Dashboard](https://www.freepik.com/developers/dashboard) - API keys and usage
 - [ShellBot](https://getshell.ai) - OpenClaw hosted service
-- [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills) - Learn about skills
+- [OpenClaw Skills Docs](https://docs.openclaw.ai/tools/skills) - Learn about skills
 
 ## License
 
-MIT
+[MIT](LICENSE)
