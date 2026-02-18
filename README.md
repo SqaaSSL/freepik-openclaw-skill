@@ -141,7 +141,7 @@ Some endpoints (Remove Background, AI Classifier) are synchronous.
 
 - [Freepik API Docs](https://docs.freepik.com) - Full API documentation
 - [Freepik Developers Dashboard](https://www.freepik.com/developers/dashboard) - API keys and usage
-- [ShellBot](https://getshell.ai) - OpenClaw hosted service
+- [ShellBot](https://getshell.ai) - OpenClaw Secure hosted service
 - [OpenClaw Skills Docs](https://docs.openclaw.ai/tools/skills) - Learn about skills
 
 ## License
