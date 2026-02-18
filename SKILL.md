@@ -1,8 +1,8 @@
 ---
 name: freepik
-version: 1.0.1
+version: 1.0.2
 description: Generate images, videos, icons, audio, and more using Freepik's AI API. Supports Mystic, Flux, Kling, Hailuo, Seedream, RunWay, Magnific upscaling, stock content, and 50+ models. Use when user wants to generate or edit images, create videos, generate icons, produce audio, or search stock content.
-allowed-tools: Bash(curl *), Bash(jq *), Bash(mkdir *), Bash(base64 *), Read, Write
+allowed-tools: Bash(curl *api.freepik.com*), Bash(curl -s -o ~/.freepik/*), Bash(jq *), Bash(mkdir -p ~/.freepik/*), Bash(base64 *)
 argument-hint: "<command> [model] [--param value]"
 metadata: {"openclaw":{"emoji":"🎨","primaryEnv":"FREEPIK_API_KEY","requires":{"env":["FREEPIK_API_KEY"]},"homepage":"https://github.com/SqaaSSL/freepik-openclaw-skill"}}
 ---
