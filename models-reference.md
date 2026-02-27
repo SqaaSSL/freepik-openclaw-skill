@@ -253,7 +253,7 @@ All requests require: `x-freepik-api-key: <YOUR_API_KEY>`
 
 Base URL: `https://api.freepik.com`
 
-Get your key: https://www.freepik.com/developers/dashboard
+Get your key: https://www.freepik.com/developers/dashboard/api-key
 
 ## Async Task Pattern
 
